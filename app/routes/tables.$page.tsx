@@ -1,5 +1,12 @@
 import { LoaderFunction } from "@remix-run/node";
-import { Link, Outlet, useLoaderData, useLocation } from "@remix-run/react";
+import {
+  Link,
+  Outlet,
+  useLoaderData,
+  useLocation,
+  useOutletContext,
+} from "@remix-run/react";
+import { TablesLayoutContext } from "./tables";
 
 export const loader: LoaderFunction = ({ params }) => {
   const { page } = params;
@@ -17,9 +24,18 @@ export default function TablePage() {
   const location = useLocation();
   const showModal = location.pathname.endsWith("details");
 
+  const outletCtx = useOutletContext<TablesLayoutContext>();
+  const { lang } = outletCtx;
+  const ctx = {
+    ...outletCtx,
+    title:
+      lang === "en" ? `Tables for page ${page}` : `Tabeller för sida ${page}`,
+  };
   return (
     <div>
-      <h1>Table Page {page}.</h1>
+      <h1>
+        {lang === "en" ? "My tables" : "Mina tabeller"} {page}.
+      </h1>
 
       <p>
         <Link to={`/tables/${page}/details`}>More details about this page</Link>
@@ -45,10 +61,12 @@ export default function TablePage() {
               padding: 30,
             }}
           >
-            <Outlet />
+            <Outlet context={ctx} />
           </div>
         </>
       ) : null}
     </div>
   );
 }
+
+export type TablePageOutletContext = TablesLayoutContext & { title: string };
